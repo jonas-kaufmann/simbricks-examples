@@ -5,7 +5,7 @@ variable "syscores" {
 
 locals {
   cpus = min(var.syscores, 4)
-  memory = min(4096, local.cpus * 512)
+  memory = min(8192, local.cpus * 512)
 }
 
 variable "outname" {
