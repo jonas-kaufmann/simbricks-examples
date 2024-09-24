@@ -3,12 +3,11 @@ import sys
 
 sys.path.append(str(os.path.dirname(__file__)))
 
-import simbricks.orchestration.experiments as exp
-import simbricks.orchestration.simulators as sim
-import simbricks.orchestration.nodeconfig as node
-import exp_util
 import itertools
-import os
+
+import exp_util
+from simbricks.orchestration import experiments as exps
+from simbricks.orchestration import nodeconfig, simulators
 
 experiments = []
 
@@ -21,22 +20,22 @@ vta_clk_freq_opts = [100, 400]
 for host_var, inference_device, vta_clk_freq in itertools.product(
     host_variants, inference_device_opts, vta_clk_freq_opts
 ):
-    experiment = exp.Experiment(
+    experiment = exps.Experiment(
         f"detect_simple-{inference_device.value}-{host_var}-{vta_clk_freq}"
     )
     pci_vta_id = 2
     sync = False
     if host_var == "qemu_kvm":
-        HostClass = sim.QemuHost
+        HostClass = simulators.QemuHost
     elif host_var == "qemu_icount":
-        HostClass = sim.QemuIcountHost
+        HostClass = simulators.QemuIcountHost
         sync = True
 
     #######################################################
     # Define application
     # -----------------------------------------------------
 
-    class TvmDetectLocal(node.AppConfig):
+    class TvmDetectLocal(nodeconfig.AppConfig):
         """Runs inference for detection model locally, either on VTA or the CPU."""
 
         def __init__(self):
@@ -89,7 +88,7 @@ for host_var, inference_device, vta_clk_freq in itertools.product(
     # Define server configuration
     # -----------------------------------------------------
 
-    class VtaNode(node.NodeConfig):
+    class VtaNode(nodeconfig.NodeConfig):
 
         def __init__(self) -> None:
             super().__init__()
